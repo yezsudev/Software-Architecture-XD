@@ -1,0 +1,15 @@
+{
+  "name": "test-performance-redis",
+  "version": "1.0.0",
+  "description": "Demo: slow DB call (~170ms) then Redis cache (~7ms)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "client": "node client.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "redis": "^4.6.7",
+    "axios": "^1.4.0"
+  }
+}
