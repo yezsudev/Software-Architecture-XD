@@ -1,0 +1,159 @@
+<svg width="100%" viewBox="0 0 680 820">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <!-- ===== LEVEL 1: CONTEXT ===== -->
+  <text class="th" x="340" y="26" text-anchor="middle" font-size="15">C4 — Level 1: System context</text>
+  <text class="ts" x="340" y="44" text-anchor="middle">Quản lý media trong CMS</text>
+
+  <!-- External: Editor user -->
+  <g class="node c-gray" onclick="sendPrompt('Người dùng Editor tương tác với hệ thống Media như thế nào?')">
+    <rect x="50" y="55" width="140" height="68" rx="10" stroke-width="0.5"/>
+    <text class="th" x="120" y="82" text-anchor="middle">Editor</text>
+    <text class="ts" x="120" y="100" text-anchor="middle">Người đăng bài</text>
+  </g>
+
+  <!-- External: Admin user -->
+  <g class="node c-gray" onclick="sendPrompt('Admin quản lý media khác Editor như thế nào?')">
+    <rect x="490" y="55" width="140" height="68" rx="10" stroke-width="0.5"/>
+    <text class="th" x="560" y="82" text-anchor="middle">Admin</text>
+    <text class="ts" x="560" y="100" text-anchor="middle">Quản trị viên</text>
+  </g>
+
+  <!-- CMS System (main) -->
+  <g class="c-blue">
+    <rect x="200" y="45" width="280" height="90" rx="12" stroke-width="1"/>
+    <text class="th" x="340" y="76" text-anchor="middle">CMS Media System</text>
+    <text class="ts" x="340" y="96" text-anchor="middle">Upload, lưu trữ, tổ chức file</text>
+    <text class="ts" x="340" y="116" text-anchor="middle">ảnh, video, tài liệu</text>
+  </g>
+
+  <!-- External systems -->
+  <g class="node c-coral" onclick="sendPrompt('CDN provider tích hợp vào CMS như thế nào?')">
+    <rect x="50" y="185" width="140" height="68" rx="10" stroke-width="0.5"/>
+    <text class="th" x="120" y="212" text-anchor="middle">CDN Provider</text>
+    <text class="ts" x="120" y="230" text-anchor="middle">CloudFront / Bunny</text>
+  </g>
+
+  <g class="node c-coral" onclick="sendPrompt('Cloud Storage S3 lưu trữ media như thế nào?')">
+    <rect x="490" y="185" width="140" height="68" rx="10" stroke-width="0.5"/>
+    <text class="th" x="560" y="212" text-anchor="middle">Cloud Storage</text>
+    <text class="ts" x="560" y="230" text-anchor="middle">AWS S3 / GCS</text>
+  </g>
+
+  <!-- Arrows context -->
+  <line x1="190" y1="89" x2="202" y2="89" class="arr" marker-end="url(#arrow)"/>
+  <line x1="480" y1="89" x2="482" y2="89" class="arr" marker-end="url(#arrow)" transform="scale(-1,1) translate(-680,0)"/>
+  <path d="M260 135 L200 185" fill="none" stroke="var(--t)" stroke-width="0.8" marker-end="url(#arrow)" opacity="0.6"/>
+  <path d="M420 135 L480 185" fill="none" stroke="var(--t)" stroke-width="0.8" marker-end="url(#arrow)" opacity="0.6"/>
+
+  <!-- Label arrows -->
+  <text class="ts" x="180" y="85" text-anchor="end">upload file</text>
+  <text class="ts" x="500" y="85">quản lý</text>
+  <text class="ts" x="190" y="168" text-anchor="middle">phân phối</text>
+  <text class="ts" x="490" y="168" text-anchor="middle">lưu trữ</text>
+
+  <!-- Divider -->
+  <line x1="60" y1="275" x2="620" y2="275" stroke="var(--t)" stroke-width="0.5" stroke-dasharray="6 4" opacity="0.4"/>
+  <text class="ts" x="340" y="292" text-anchor="middle" opacity="0.6">— Level 2: Container diagram —</text>
+
+  <!-- ===== LEVEL 2: CONTAINER ===== -->
+  <text class="th" x="340" y="318" text-anchor="middle" font-size="15">C4 — Level 2: Container</text>
+
+  <!-- Browser -->
+  <g class="node c-gray" onclick="sendPrompt('Media Uploader UI được xây dựng bằng công nghệ nào?')">
+    <rect x="260" y="330" width="160" height="62" rx="8" stroke-width="0.5"/>
+    <text class="th" x="340" y="354" text-anchor="middle">Media Uploader UI</text>
+    <text class="ts" x="340" y="372" text-anchor="middle">React SPA</text>
+  </g>
+
+  <!-- Arrow down -->
+  <line x1="340" y1="392" x2="340" y2="415" class="arr" marker-end="url(#arrow)"/>
+  <text class="ts" x="350" y="407">HTTPS / REST</text>
+
+  <!-- API Gateway -->
+  <g class="node c-purple" onclick="sendPrompt('API Gateway xử lý request upload như thế nào?')">
+    <rect x="220" y="420" width="240" height="62" rx="8" stroke-width="0.5"/>
+    <text class="th" x="340" y="444" text-anchor="middle">API Gateway</text>
+    <text class="ts" x="340" y="462" text-anchor="middle">Auth · Rate limit · Routing</text>
+  </g>
+
+  <!-- Arrow down -->
+  <line x1="340" y1="482" x2="340" y2="502" class="arr" marker-end="url(#arrow)"/>
+
+  <!-- Three containers row -->
+  <!-- Media Service -->
+  <g class="node c-teal" onclick="sendPrompt('Media Service xử lý những nghiệp vụ gì?')">
+    <rect x="60" y="510" width="160" height="70" rx="8" stroke-width="0.5"/>
+    <text class="th" x="140" y="535" text-anchor="middle">Media Service</text>
+    <text class="ts" x="140" y="553" text-anchor="middle">Upload, delete</text>
+    <text class="ts" x="140" y="569" text-anchor="middle">Node.js</text>
+  </g>
+
+  <!-- Transform Service -->
+  <g class="node c-teal" onclick="sendPrompt('Transform Service resize và convert ảnh như thế nào?')">
+    <rect x="260" y="510" width="160" height="70" rx="8" stroke-width="0.5"/>
+    <text class="th" x="340" y="535" text-anchor="middle">Transform Service</text>
+    <text class="ts" x="340" y="553" text-anchor="middle">Resize, convert</text>
+    <text class="ts" x="340" y="569" text-anchor="middle">Python / Sharp</text>
+  </g>
+
+  <!-- Metadata Service -->
+  <g class="node c-teal" onclick="sendPrompt('Metadata Service lưu những thông tin gì về file?')">
+    <rect x="460" y="510" width="160" height="70" rx="8" stroke-width="0.5"/>
+    <text class="th" x="540" y="535" text-anchor="middle">Metadata Service</text>
+    <text class="ts" x="540" y="553" text-anchor="middle">EXIF, tags, slug</text>
+    <text class="ts" x="540" y="569" text-anchor="middle">Go</text>
+  </g>
+
+  <!-- Arrows from API GW to services -->
+  <path d="M290 482 L140 510" fill="none" stroke="var(--t)" stroke-width="0.8" marker-end="url(#arrow)" opacity="0.7"/>
+  <line x1="340" y1="482" x2="340" y2="510" class="arr" marker-end="url(#arrow)"/>
+  <path d="M390 482 L540 510" fill="none" stroke="var(--t)" stroke-width="0.8" marker-end="url(#arrow)" opacity="0.7"/>
+
+  <!-- Arrows services → storage row -->
+  <line x1="140" y1="580" x2="140" y2="620" class="arr" marker-end="url(#arrow)"/>
+  <line x1="340" y1="580" x2="280" y2="620" class="arr" marker-end="url(#arrow)"/>
+  <line x1="540" y1="580" x2="540" y2="620" class="arr" marker-end="url(#arrow)"/>
+
+  <!-- Storage row -->
+  <g class="node c-amber" onclick="sendPrompt('Object Store lưu trữ file gốc và đã transform như thế nào?')">
+    <rect x="60" y="625" width="180" height="62" rx="8" stroke-width="0.5"/>
+    <text class="th" x="150" y="649" text-anchor="middle">Object Store</text>
+    <text class="ts" x="150" y="667" text-anchor="middle">S3-compatible bucket</text>
+  </g>
+
+  <g class="node c-amber" onclick="sendPrompt('Image Cache hoạt động như thế nào?')">
+    <rect x="260" y="625" width="160" height="62" rx="8" stroke-width="0.5"/>
+    <text class="th" x="340" y="649" text-anchor="middle">Image Cache</text>
+    <text class="ts" x="340" y="667" text-anchor="middle">Redis · thumbnails</text>
+  </g>
+
+  <g class="node c-amber" onclick="sendPrompt('Media DB lưu metadata bằng cơ sở dữ liệu nào?')">
+    <rect x="440" y="625" width="180" height="62" rx="8" stroke-width="0.5"/>
+    <text class="th" x="530" y="649" text-anchor="middle">Media DB</text>
+    <text class="ts" x="530" y="667" text-anchor="middle">PostgreSQL</text>
+  </g>
+
+  <!-- CDN arrow -->
+  <line x1="150" y1="687" x2="150" y2="720" class="arr" marker-end="url(#arrow)"/>
+  <g class="node c-coral" onclick="sendPrompt('CDN phân phối media tới người dùng cuối như thế nào?')">
+    <rect x="220" y="725" width="240" height="62" rx="8" stroke-width="0.5"/>
+    <text class="th" x="340" y="749" text-anchor="middle">CDN Edge Nodes</text>
+    <text class="ts" x="340" y="767" text-anchor="middle">Phân phối nội dung toàn cầu</text>
+  </g>
+  <path d="M150 720 L300 725" fill="none" stroke="var(--t)" stroke-width="0.8" marker-end="url(#arrow)" opacity="0.5"/>
+
+  <!-- Legend -->
+  <rect x="60" y="800" width="12" height="12" rx="2" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.5"/>
+  <text class="ts" x="78" y="811">Service</text>
+  <rect x="160" y="800" width="12" height="12" rx="2" fill="#FAC775" stroke="#854F0B" stroke-width="0.5"/>
+  <text class="ts" x="178" y="811">Storage</text>
+  <rect x="260" y="800" width="12" height="12" rx="2" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.5"/>
+  <text class="ts" x="278" y="811">External</text>
+  <rect x="360" y="800" width="12" height="12" rx="2" fill="#D3D1C7" stroke="#5F5E5A" stroke-width="0.5"/>
+  <text class="ts" x="378" y="811">User / UI</text>
+</svg>
