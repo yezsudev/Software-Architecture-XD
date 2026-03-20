@@ -17,7 +17,7 @@ public class MenuItemService {
     private final RestaurantRepository restaurantRepository;
 
     public List<MenuItem> getMenuItemsByRestaurant(Long restaurantId) {
-        return menuItemRepository.findByRestaurantId(restaurantId);
+        return menuItemRepository.findByRestaurant_Id(restaurantId);
     }
 
     public MenuItem getMenuItemById(Long id) {

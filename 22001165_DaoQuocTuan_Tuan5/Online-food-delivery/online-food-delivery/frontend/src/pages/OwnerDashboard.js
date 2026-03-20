@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    getRestaurants, getMenuItems, createMenuItem, updateMenuItem, deleteMenuItem,
+    getRestaurants, createRestaurant, updateRestaurant, deleteRestaurant,
+    getMenuItems, createMenuItem, updateMenuItem, deleteMenuItem,
     getOrdersByRestaurant, updateOrderStatus
 } from '../services/api';
 
@@ -28,6 +29,11 @@ function OwnerDashboard() {
     const [menuForm, setMenuForm] = useState({
         name: '', description: '', price: '', imageUrl: '', available: true
     });
+    const [showRestaurantForm, setShowRestaurantForm] = useState(false);
+    const [editingRestaurant, setEditingRestaurant] = useState(null);
+    const [restaurantForm, setRestaurantForm] = useState({
+        name: '', address: '', phone: '', imageUrl: ''
+    });
 
     useEffect(() => {
         getRestaurants().then(res => {
@@ -35,6 +41,12 @@ function OwnerDashboard() {
             if (res.data.length > 0) setSelectedRestaurant(res.data[0]);
         });
     }, []);
+
+    const loadRestaurants = () => {
+        getRestaurants().then(res => {
+            setRestaurants(res.data);
+        });
+    };
 
     const loadData = useCallback(() => {
         if (!selectedRestaurant) return;
@@ -48,6 +60,56 @@ function OwnerDashboard() {
 
     const handleSelectRestaurant = (r) => {
         setSelectedRestaurant(r);
+    };
+
+    // Restaurant CRUD
+    const openAddRestaurantForm = () => {
+        setEditingRestaurant(null);
+        setRestaurantForm({ name: '', address: '', phone: '', imageUrl: '' });
+        setShowRestaurantForm(true);
+    };
+
+    const openEditRestaurantForm = (r) => {
+        setEditingRestaurant(r);
+        setRestaurantForm({
+            name: r.name,
+            address: r.address || '',
+            phone: r.phone || '',
+            imageUrl: r.imageUrl || ''
+        });
+        setShowRestaurantForm(true);
+    };
+
+    const handleSaveRestaurant = async () => {
+        if (!restaurantForm.name.trim()) {
+            alert('Restaurant name is required');
+            return;
+        }
+        try {
+            if (editingRestaurant) {
+                const res = await updateRestaurant(editingRestaurant.id, restaurantForm);
+                setSelectedRestaurant(res.data);
+            } else {
+                const res = await createRestaurant(restaurantForm);
+                setSelectedRestaurant(res.data);
+            }
+            setShowRestaurantForm(false);
+            loadRestaurants();
+        } catch (err) {
+            alert('Failed to save restaurant');
+        }
+    };
+
+    const handleDeleteRestaurant = async (r) => {
+        if (!window.confirm(`Delete restaurant "${r.name}"? This will also delete all its menu items.`)) return;
+        try {
+            await deleteRestaurant(r.id);
+            const remaining = restaurants.filter(x => x.id !== r.id);
+            setRestaurants(remaining);
+            setSelectedRestaurant(remaining.length > 0 ? remaining[0] : null);
+        } catch (err) {
+            alert('Failed to delete restaurant');
+        }
     };
 
     // Menu CRUD
@@ -121,7 +183,7 @@ function OwnerDashboard() {
             </div>
 
             {/* Restaurant Selector */}
-            <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 {restaurants.map(r => (
                     <button
                         key={r.id}
@@ -131,7 +193,26 @@ function OwnerDashboard() {
                         {r.name}
                     </button>
                 ))}
+                <button className="btn btn-success" onClick={openAddRestaurantForm}>
+                    + Add Restaurant
+                </button>
+                {selectedRestaurant && (
+                    <>
+                        <button className="btn btn-secondary btn-sm" onClick={() => openEditRestaurantForm(selectedRestaurant)}>
+                            ✏️ Edit
+                        </button>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDeleteRestaurant(selectedRestaurant)}>
+                            🗑️ Delete
+                        </button>
+                    </>
+                )}
             </div>
+
+            {!selectedRestaurant && restaurants.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '3rem', color: '#888' }}>
+                    <p style={{ fontSize: '1.1rem' }}>No restaurants yet. Click <strong>+ Add Restaurant</strong> to get started.</p>
+                </div>
+            )}
 
             {selectedRestaurant && (
                 <>
@@ -305,6 +386,59 @@ function OwnerDashboard() {
                                 {editingItem ? 'Update' : 'Add'}
                             </button>
                             <button className="btn btn-secondary" onClick={() => setShowMenuForm(false)}>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Restaurant Form Modal */}
+            {showRestaurantForm && (
+                <div className="modal-overlay" onClick={() => setShowRestaurantForm(false)}>
+                    <div className="modal" onClick={e => e.stopPropagation()}>
+                        <h2>{editingRestaurant ? 'Edit Restaurant' : 'Add Restaurant'}</h2>
+                        <div className="form-group">
+                            <label>Name *</label>
+                            <input
+                                type="text" className="form-control"
+                                value={restaurantForm.name}
+                                onChange={e => setRestaurantForm({ ...restaurantForm, name: e.target.value })}
+                                placeholder="Restaurant name"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Address</label>
+                            <input
+                                type="text" className="form-control"
+                                value={restaurantForm.address}
+                                onChange={e => setRestaurantForm({ ...restaurantForm, address: e.target.value })}
+                                placeholder="Restaurant address"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Phone</label>
+                            <input
+                                type="text" className="form-control"
+                                value={restaurantForm.phone}
+                                onChange={e => setRestaurantForm({ ...restaurantForm, phone: e.target.value })}
+                                placeholder="Phone number"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Image URL</label>
+                            <input
+                                type="text" className="form-control"
+                                value={restaurantForm.imageUrl}
+                                onChange={e => setRestaurantForm({ ...restaurantForm, imageUrl: e.target.value })}
+                                placeholder="https://..."
+                            />
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleSaveRestaurant}>
+                                {editingRestaurant ? 'Update' : 'Add'}
+                            </button>
+                            <button className="btn btn-secondary" onClick={() => setShowRestaurantForm(false)}>
                                 Cancel
                             </button>
                         </div>
