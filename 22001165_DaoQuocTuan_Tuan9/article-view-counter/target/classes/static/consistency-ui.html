@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consistency Lab</title>
+  <style>
+    :root {
+      --bg1: #eff6ef;
+      --bg2: #d9ebe1;
+      --card: #ffffff;
+      --text: #1f2d27;
+      --muted: #5a6d63;
+      --primary: #1f6e58;
+      --secondary: #2a7e65;
+      --danger: #8f2c2c;
+      --line: #d4dfd9;
+      --ok: #1b7a42;
+      --warn: #9a6a12;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 8% 12%, rgba(31, 110, 88, 0.18), transparent 28%),
+        radial-gradient(circle at 90% 18%, rgba(42, 126, 101, 0.16), transparent 30%),
+        linear-gradient(140deg, var(--bg1), var(--bg2));
+      padding: 20px;
+      display: grid;
+      place-items: center;
+    }
+
+    .wrap {
+      width: min(1100px, 100%);
+      display: grid;
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(19, 42, 34, 0.11);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .row { grid-template-columns: 1fr; }
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 11px;
+      border: 1px solid #c7d8cf;
+      border-radius: 10px;
+      background: #fbfdfb;
+      outline: none;
+      font-size: 0.95rem;
+    }
+
+    input:focus {
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 3px rgba(42, 126, 101, 0.15);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--primary);
+      cursor: pointer;
+    }
+
+    button.alt { background: var(--secondary); }
+    button.ghost {
+      color: var(--text);
+      background: #ecf5f0;
+      border: 1px solid #cbded4;
+    }
+    button.danger { background: var(--danger); }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .kpi {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 10px;
+      background: #f8fcfa;
+    }
+
+    .kpi small { color: var(--muted); }
+    .kpi strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 1.2rem;
+    }
+
+    .status { min-height: 20px; color: var(--muted); font-size: 0.9rem; }
+    .status.ok { color: var(--ok); }
+    .status.warn { color: var(--warn); }
+
+    .log {
+      background: #0f1c17;
+      color: #c8ffe5;
+      border: 1px solid #233a31;
+      border-radius: 12px;
+      min-height: 180px;
+      max-height: 360px;
+      overflow: auto;
+      white-space: pre-wrap;
+      font-family: Consolas, monospace;
+      font-size: 0.84rem;
+      padding: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      border-bottom: 1px solid #e2ece7;
+      text-align: left;
+      padding: 8px 6px;
+    }
+
+    th { color: var(--muted); font-weight: 700; }
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <section class="card">
+    <h2 style="margin:0 0 6px;">Consistency Lab</h2>
+    <div class="status" id="status">Ready.</div>
+    <div class="row" style="margin-top:10px;">
+      <div>
+        <label for="baseUrl">Base URL</label>
+        <input id="baseUrl" value="http://localhost:8080" />
+      </div>
+      <div>
+        <label for="singlePostId">Single Post ID</label>
+        <input id="singlePostId" value="123" />
+      </div>
+      <div>
+        <label for="checkInterval">Auto-check interval (ms)</label>
+        <input id="checkInterval" type="number" min="1000" value="3000" />
+      </div>
+    </div>
+    <div class="actions">
+      <button id="btnCheckOne">Check consistency now</button>
+      <button id="btnStartAuto" class="alt">Start auto-check</button>
+      <button id="btnStopAuto" class="ghost">Stop auto-check</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3 style="margin-top:0;">Multi-post burst test</h3>
+    <div class="row">
+      <div>
+        <label for="postPrefix">Post prefix</label>
+        <input id="postPrefix" value="post" />
+      </div>
+      <div>
+        <label for="postCount">Number of posts</label>
+        <input id="postCount" type="number" min="1" value="20" />
+      </div>
+      <div>
+        <label for="totalReq">Total requests</label>
+        <input id="totalReq" type="number" min="1" value="1000" />
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <div>
+        <label for="concurrency">Concurrency</label>
+        <input id="concurrency" type="number" min="1" value="40" />
+      </div>
+      <div></div>
+      <div></div>
+    </div>
+    <div class="actions">
+      <button id="btnRunMulti">Run multi-post burst</button>
+      <button id="btnSample" class="alt">Sample top 5 consistency</button>
+      <button id="btnClear" class="danger">Clear log</button>
+    </div>
+  </section>
+
+  <section class="card kpis">
+    <div class="kpi"><small>Requests OK</small><strong id="ok">0</strong></div>
+    <div class="kpi"><small>Requests Error</small><strong id="err">0</strong></div>
+    <div class="kpi"><small>Redis Views</small><strong id="redisViews">-</strong></div>
+    <div class="kpi"><small>DB Views</small><strong id="dbViews">-</strong></div>
+    <div class="kpi"><small>Lag (Redis-DB)</small><strong id="lag">-</strong></div>
+  </section>
+
+  <section class="card">
+    <h3 style="margin-top:0;">Sample consistency table</h3>
+    <table>
+      <thead>
+      <tr><th>Post ID</th><th>Redis</th><th>DB</th><th>Lag</th><th>Consistent</th></tr>
+      </thead>
+      <tbody id="sampleTable"></tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <div class="log" id="log"></div>
+  </section>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const state = { ok: 0, err: 0, autoTimer: null, lastPosts: [] };
+
+  function baseUrl() { return $("baseUrl").value.trim().replace(/\/$/, ""); }
+  function setStatus(text, kind = "") {
+    const el = $("status");
+    el.textContent = text;
+    el.className = `status ${kind}`.trim();
+  }
+  function logLine(line) {
+    const now = new Date().toISOString();
+    const el = $("log");
+    el.textContent += `[${now}] ${line}\n`;
+    el.scrollTop = el.scrollHeight;
+  }
+  function updateCounters() {
+    $("ok").textContent = String(state.ok);
+    $("err").textContent = String(state.err);
+  }
+
+  async function callJson(url, options = {}) {
+    const res = await fetch(url, options);
+    let data = null;
+    try { data = await res.json(); } catch { data = null; }
+    return { res, data };
+  }
+
+  async function checkConsistency(postId) {
+    const { res, data } = await callJson(`${baseUrl()}/consistency?postId=${encodeURIComponent(postId)}`);
+    if (!res.ok || !data || !data.data) {
+      throw new Error(`Consistency API failed (${res.status})`);
+    }
+    const d = data.data;
+    $("redisViews").textContent = String(d.redisViews);
+    $("dbViews").textContent = String(d.dbViews);
+    $("lag").textContent = String(d.lag);
+    return d;
+  }
+
+  async function checkOne() {
+    const postId = $("singlePostId").value.trim();
+    if (!postId) {
+      setStatus("Single Post ID is required.", "warn");
+      return;
+    }
+    try {
+      const d = await checkConsistency(postId);
+      setStatus(d.consistent ? "Consistent" : "Eventually consistent (lag > 0)", d.consistent ? "ok" : "warn");
+      logLine(`consistency postId=${postId} redis=${d.redisViews} db=${d.dbViews} lag=${d.lag}`);
+      state.ok++;
+    } catch (e) {
+      setStatus(e.message, "warn");
+      logLine(`checkOne error: ${e.message}`);
+      state.err++;
+    }
+    updateCounters();
+  }
+
+  function startAutoCheck() {
+    stopAutoCheck();
+    const ms = Number($("checkInterval").value || 0);
+    if (ms < 1000) {
+      setStatus("Interval must be >= 1000ms", "warn");
+      return;
+    }
+    state.autoTimer = setInterval(checkOne, ms);
+    setStatus(`Auto-check started (${ms}ms)`, "ok");
+    logLine(`auto-check started interval=${ms}ms`);
+  }
+
+  function stopAutoCheck() {
+    if (state.autoTimer) {
+      clearInterval(state.autoTimer);
+      state.autoTimer = null;
+      setStatus("Auto-check stopped");
+      logLine("auto-check stopped");
+    }
+  }
+
+  async function runMultiPostBurst() {
+    const prefix = $("postPrefix").value.trim() || "post";
+    const postCount = Number($("postCount").value || 0);
+    const totalReq = Number($("totalReq").value || 0);
+    const concurrency = Number($("concurrency").value || 0);
+
+    if (postCount <= 0 || totalReq <= 0 || concurrency <= 0) {
+      setStatus("Burst inputs must be > 0", "warn");
+      return;
+    }
+
+    const posts = Array.from({ length: postCount }, (_, i) => `${prefix}-${i + 1}`);
+    state.lastPosts = posts;
+
+    setStatus(`Running burst ${totalReq} req on ${postCount} posts...`);
+    logLine(`multi-burst start total=${totalReq} posts=${postCount} concurrency=${concurrency}`);
+
+    let next = 0;
+    let ok = 0;
+    let err = 0;
+
+    async function workerLoop() {
+      while (true) {
+        const i = next;
+        next += 1;
+        if (i >= totalReq) return;
+        const postId = posts[Math.floor(Math.random() * posts.length)];
+        try {
+          const res = await fetch(`${baseUrl()}/view?postId=${encodeURIComponent(postId)}`, { method: "POST" });
+          if (res.ok) ok++; else err++;
+        } catch {
+          err++;
+        }
+      }
+    }
+
+    const jobs = Array.from({ length: Math.min(concurrency, totalReq) }, () => workerLoop());
+    const start = performance.now();
+    await Promise.all(jobs);
+    const elapsed = Math.round(performance.now() - start);
+    const rps = Math.round((totalReq * 1000) / Math.max(1, elapsed));
+
+    state.ok += ok;
+    state.err += err;
+    updateCounters();
+
+    setStatus(`Burst done: ok=${ok}, err=${err}, ${rps} req/s`, err > 0 ? "warn" : "ok");
+    logLine(`multi-burst done elapsed=${elapsed}ms ok=${ok} err=${err} approxRps=${rps}`);
+  }
+
+  async function sampleTop5Consistency() {
+    if (!state.lastPosts.length) {
+      setStatus("Run multi-post burst first to generate sample posts", "warn");
+      return;
+    }
+
+    const sample = state.lastPosts.slice(0, 5);
+    const tbody = $("sampleTable");
+    tbody.innerHTML = "";
+
+    for (const postId of sample) {
+      try {
+        const d = await checkConsistency(postId);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${postId}</td><td>${d.redisViews}</td><td>${d.dbViews}</td><td>${d.lag}</td><td>${d.consistent}</td>`;
+        tbody.appendChild(tr);
+      } catch (e) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${postId}</td><td>-</td><td>-</td><td>-</td><td>error</td>`;
+        tbody.appendChild(tr);
+        logLine(`sample error postId=${postId}: ${e.message}`);
+      }
+    }
+
+    logLine("sample top5 consistency completed");
+    setStatus("Sample consistency updated", "ok");
+  }
+
+  function clearLog() {
+    $("log").textContent = "";
+    setStatus("Log cleared");
+  }
+
+  $("btnCheckOne").addEventListener("click", checkOne);
+  $("btnStartAuto").addEventListener("click", startAutoCheck);
+  $("btnStopAuto").addEventListener("click", stopAutoCheck);
+  $("btnRunMulti").addEventListener("click", runMultiPostBurst);
+  $("btnSample").addEventListener("click", sampleTop5Consistency);
+  $("btnClear").addEventListener("click", clearLog);
+
+  logLine("Consistency Lab loaded. Use Check consistency now.");
+</script>
+</body>
+</html>

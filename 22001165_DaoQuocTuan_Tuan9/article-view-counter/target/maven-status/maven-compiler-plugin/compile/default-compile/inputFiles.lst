@@ -1,0 +1,16 @@
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\service\RedisViewService.java
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\config\AsyncConfig.java
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\worker\BatchViewUpdateRepository.java
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\config\RabbitMQConfig.java
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\worker\ViewEventBatchConsumer.java
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\worker\QueueLagMonitor.java
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\model\ApiResponse.java
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\producer\ViewEventProducer.java
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\service\ViewService.java
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\controller\GlobalExceptionHandler.java
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\model\ViewEvent.java
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\config\RedisConfig.java
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\ArticleViewCounterApplication.java
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\controller\ViewController.java
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\service\PostViewReadService.java
+T:\Software-Architecture-XD\22001165_DaoQuocTuan_Tuan9\article-view-counter\src\main\java\com\viewcounter\worker\BatchPersistResult.java

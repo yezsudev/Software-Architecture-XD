@@ -1,0 +1,32 @@
+spring:
+  main:
+    web-application-type: none
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/view_counter}
+    username: ${DB_USERNAME:view_user}
+    password: ${DB_PASSWORD:view_pass}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:20}
+      minimum-idle: 5
+      connection-timeout: 3000
+      idle-timeout: 30000
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  rabbitmq:
+    listener:
+      simple:
+        concurrency: 2
+        max-concurrency: 8
+
+app:
+  worker:
+    batch:
+      max-size: ${WORKER_BATCH_MAX_SIZE:1000}
+      flush-interval-ms: ${WORKER_BATCH_FLUSH_INTERVAL_MS:5000}
+    monitor:
+      queue-lag-threshold: ${WORKER_QUEUE_LAG_THRESHOLD:20000}
+      queue-lag-interval-ms: ${WORKER_QUEUE_LAG_INTERVAL_MS:15000}

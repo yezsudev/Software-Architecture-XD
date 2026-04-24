@@ -1,0 +1,92 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: article-view-counter
+
+  # Redis Configuration (Lettuce connection pool)
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 50       # max connections in pool
+          max-idle: 20
+          min-idle: 5
+          max-wait: 1000ms     # wait time if pool exhausted
+
+  # RabbitMQ Configuration
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: /
+    connection-timeout: 5000ms
+    template:
+      retry:
+        enabled: true
+        initial-interval: 500ms
+        max-attempts: 3
+        max-interval: 5000ms
+        multiplier: 2.0
+    listener:
+      simple:
+        acknowledge-mode: auto
+        prefetch: 10
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/view_counter}
+    username: ${DB_USERNAME:view_user}
+    password: ${DB_PASSWORD:view_pass}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:20}
+      minimum-idle: 5
+      connection-timeout: 3000
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+# App-specific config
+app:
+  redis:
+    key-prefix: "post"
+    key-suffix: "views"
+    key-ttl-days: 30           # optional TTL
+  rabbitmq:
+    exchange: "view.exchange"
+    queue: "view.queue"
+    routing-key: "view.created"
+    dead-letter-exchange: "view.dlx"
+    dead-letter-queue: "view.dlq"
+  worker:
+    batch:
+      max-size: 500
+      flush-interval-ms: 5000
+    monitor:
+      queue-lag-threshold: 10000
+      queue-lag-interval-ms: 15000
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# Logging
+logging:
+  level:
+    com.viewcounter: DEBUG
+    org.springframework.amqp: WARN
+    io.lettuce: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] - %msg%n"

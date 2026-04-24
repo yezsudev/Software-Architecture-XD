@@ -1,0 +1,133 @@
+version: '3.8'
+
+services:
+
+  # ─── Redis ───────────────────────────────────────────
+  redis:
+    image: redis:7.2-alpine
+    container_name: view-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - view-net
+
+  # ─── RabbitMQ ────────────────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: view-rabbitmq
+    ports:
+      - "5672:5672"      # AMQP
+      - "15672:15672"    # Management UI (guest/guest)
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - view-net
+
+  # ─── PostgreSQL ──────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: view-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: view_counter
+      POSTGRES_USER: view_user
+      POSTGRES_PASSWORD: view_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U view_user -d view_counter"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - view-net
+
+  # ─── Spring Boot App ─────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: view-counter-api
+    ports:
+      - "8080:8080"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+      DB_URL: jdbc:postgresql://postgres:5432/view_counter
+      DB_USERNAME: view_user
+      DB_PASSWORD: view_pass
+      JAVA_OPTS: "-Xms256m -Xmx512m -XX:+UseG1GC"
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - view-net
+    restart: unless-stopped
+
+  # ─── Worker (Batch Consumer -> DB) ───────────────────
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: view-counter-worker
+    environment:
+      SPRING_PROFILES_ACTIVE: worker
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+      DB_URL: jdbc:postgresql://postgres:5432/view_counter
+      DB_USERNAME: view_user
+      DB_PASSWORD: view_pass
+      WORKER_BATCH_MAX_SIZE: 1000
+      WORKER_BATCH_FLUSH_INTERVAL_MS: 5000
+      JAVA_OPTS: "-Xms256m -Xmx512m -XX:+UseG1GC"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - view-net
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  rabbitmq_data:
+  postgres_data:
+
+networks:
+  view-net:
+    driver: bridge

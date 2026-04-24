@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Counter Test UI</title>
+  <style>
+    :root {
+      --bg-1: #f5f1e8;
+      --bg-2: #d7e6dc;
+      --card: #fffdf9;
+      --text: #1e2b24;
+      --muted: #5e6f66;
+      --primary: #215f4d;
+      --primary-2: #2d7a63;
+      --danger: #9a2d2d;
+      --line: #d9d9d9;
+      --ok: #1d6a3b;
+      --shadow: 0 10px 30px rgba(14, 39, 30, 0.12);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 15%, rgba(33, 95, 77, 0.18) 0, transparent 30%),
+        radial-gradient(circle at 85% 18%, rgba(45, 122, 99, 0.22) 0, transparent 28%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .wrap {
+      width: min(960px, 100%);
+      display: grid;
+      gap: 16px;
+      animation: slideIn 320ms ease-out;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .hero h1 {
+      margin: 0;
+      letter-spacing: 0.2px;
+      font-size: clamp(1.3rem, 2.7vw, 2rem);
+    }
+
+    .hero p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .row {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.92rem;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid #c8d4ce;
+      background: #fbfdfb;
+      padding: 11px 12px;
+      border-radius: 10px;
+      font-size: 0.98rem;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--primary-2);
+      box-shadow: 0 0 0 3px rgba(45, 122, 99, 0.16);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.15s ease;
+      background: var(--primary);
+      color: #fff;
+    }
+
+    button.secondary { background: #2f5447; }
+    button.ghost {
+      background: #eef5f1;
+      color: var(--text);
+      border: 1px solid #ccddd4;
+    }
+
+    button.danger { background: var(--danger); }
+
+    button:hover { opacity: 0.95; }
+    button:active { transform: translateY(1px); }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 860px) {
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .kpi {
+      border: 1px solid #d6e3dc;
+      border-radius: 12px;
+      padding: 10px;
+      background: #f9fcfa;
+    }
+
+    .kpi .name {
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+
+    .kpi .val {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .status {
+      font-size: 0.9rem;
+      color: var(--muted);
+      min-height: 22px;
+    }
+
+    .status.ok { color: var(--ok); }
+    .status.err { color: var(--danger); }
+
+    .log {
+      background: #0d1a16;
+      color: #c8ffe7;
+      border-radius: 12px;
+      border: 1px solid #1b3a30;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 0.85rem;
+      padding: 12px;
+      min-height: 180px;
+      max-height: 320px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(8px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card hero">
+      <div>
+        <h1>View Counter Test UI</h1>
+        <p>Test POST /view, GET /views and burst load from browser.</p>
+      </div>
+      <div class="status" id="status">Ready.</div>
+    </section>
+
+    <section class="card">
+      <div class="grid">
+        <div>
+          <div class="row">
+            <label for="baseUrl">Base URL</label>
+            <input id="baseUrl" value="http://localhost:8080" />
+          </div>
+          <div class="row">
+            <label for="postId">Post ID</label>
+            <input id="postId" value="123" />
+          </div>
+          <div class="actions">
+            <button id="btnIncrement">POST /view (+1)</button>
+            <button id="btnGet" class="secondary">GET /views</button>
+            <button id="btnHealth" class="ghost">Check health</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="row">
+            <label for="burstCount">Burst count</label>
+            <input id="burstCount" type="number" min="1" value="200" />
+          </div>
+          <div class="row">
+            <label for="burstConcurrency">Burst concurrency</label>
+            <input id="burstConcurrency" type="number" min="1" value="20" />
+          </div>
+          <div class="actions">
+            <button id="btnBurst">Run burst test</button>
+            <button id="btnClear" class="danger">Clear log</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card kpis">
+      <div class="kpi"><div class="name">Success</div><div class="val" id="okCount">0</div></div>
+      <div class="kpi"><div class="name">Errors</div><div class="val" id="errCount">0</div></div>
+      <div class="kpi"><div class="name">Last Views</div><div class="val" id="lastViews">-</div></div>
+      <div class="kpi"><div class="name">Last Time (ms)</div><div class="val" id="lastMs">-</div></div>
+    </section>
+
+    <section class="card">
+      <div class="log" id="log"></div>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    const state = {
+      ok: 0,
+      err: 0,
+      inFlight: false
+    };
+
+    function setStatus(text, kind = "") {
+      const el = $("status");
+      el.textContent = text;
+      el.className = `status ${kind}`.trim();
+    }
+
+    function updateKpi() {
+      $("okCount").textContent = String(state.ok);
+      $("errCount").textContent = String(state.err);
+    }
+
+    function logLine(line) {
+      const el = $("log");
+      const now = new Date().toISOString();
+      el.textContent += `[${now}] ${line}\n`;
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function getBaseUrl() {
+      return $("baseUrl").value.trim().replace(/\/$/, "");
+    }
+
+    function getPostId() {
+      return $("postId").value.trim();
+    }
+
+    async function callJson(url, options = {}) {
+      const start = performance.now();
+      const res = await fetch(url, options);
+      const elapsed = Math.round(performance.now() - start);
+      let data = null;
+      try {
+        data = await res.json();
+      } catch {
+        data = null;
+      }
+      $("lastMs").textContent = String(elapsed);
+      return { res, data, elapsed };
+    }
+
+    async function postView() {
+      const postId = getPostId();
+      if (!postId) {
+        setStatus("postId is required", "err");
+        return;
+      }
+
+      try {
+        const { res, data, elapsed } = await callJson(`${getBaseUrl()}/view?postId=${encodeURIComponent(postId)}`, {
+          method: "POST"
+        });
+
+        if (!res.ok) {
+          state.err++;
+          updateKpi();
+          setStatus(`POST failed ${res.status}`, "err");
+          logLine(`POST /view failed ${res.status} in ${elapsed}ms => ${JSON.stringify(data)}`);
+          return;
+        }
+
+        state.ok++;
+        updateKpi();
+        const views = data && data.data ? data.data.views : "?";
+        $("lastViews").textContent = String(views);
+        setStatus("POST /view success", "ok");
+        logLine(`POST /view success in ${elapsed}ms, views=${views}`);
+      } catch (err) {
+        state.err++;
+        updateKpi();
+        setStatus("Network error", "err");
+        logLine(`POST /view error: ${err.message}`);
+      }
+    }
+
+    async function getViews() {
+      const postId = getPostId();
+      if (!postId) {
+        setStatus("postId is required", "err");
+        return;
+      }
+
+      try {
+        const { res, data, elapsed } = await callJson(`${getBaseUrl()}/views?postId=${encodeURIComponent(postId)}`);
+
+        if (!res.ok) {
+          state.err++;
+          updateKpi();
+          setStatus(`GET failed ${res.status}`, "err");
+          logLine(`GET /views failed ${res.status} in ${elapsed}ms => ${JSON.stringify(data)}`);
+          return;
+        }
+
+        state.ok++;
+        updateKpi();
+        const views = data && data.data ? data.data.views : "?";
+        $("lastViews").textContent = String(views);
+        setStatus("GET /views success", "ok");
+        logLine(`GET /views success in ${elapsed}ms, views=${views}`);
+      } catch (err) {
+        state.err++;
+        updateKpi();
+        setStatus("Network error", "err");
+        logLine(`GET /views error: ${err.message}`);
+      }
+    }
+
+    async function checkHealth() {
+      try {
+        const { res, elapsed } = await callJson(`${getBaseUrl()}/actuator/health`);
+        if (!res.ok) {
+          setStatus(`Health failed ${res.status}`, "err");
+          logLine(`GET /actuator/health failed ${res.status} in ${elapsed}ms`);
+          return;
+        }
+        setStatus("Health OK", "ok");
+        logLine(`GET /actuator/health success in ${elapsed}ms`);
+      } catch (err) {
+        setStatus("Health network error", "err");
+        logLine(`Health error: ${err.message}`);
+      }
+    }
+
+    async function runBurst() {
+      if (state.inFlight) return;
+
+      const total = Number($("burstCount").value || 0);
+      const concurrency = Number($("burstConcurrency").value || 0);
+
+      if (total <= 0 || concurrency <= 0) {
+        setStatus("Burst values must be > 0", "err");
+        return;
+      }
+
+      const postId = getPostId();
+      if (!postId) {
+        setStatus("postId is required", "err");
+        return;
+      }
+
+      state.inFlight = true;
+      ["btnBurst", "btnIncrement", "btnGet"].forEach((id) => $(id).disabled = true);
+      setStatus(`Running burst ${total} req @ ${concurrency} concurrency...`);
+      logLine(`Burst start total=${total}, concurrency=${concurrency}`);
+
+      let next = 0;
+      let ok = 0;
+      let err = 0;
+      const started = performance.now();
+
+      async function workerLoop() {
+        while (true) {
+          const current = next;
+          next += 1;
+          if (current >= total) return;
+
+          try {
+            const res = await fetch(`${getBaseUrl()}/view?postId=${encodeURIComponent(postId)}`, { method: "POST" });
+            if (res.ok) ok++; else err++;
+          } catch {
+            err++;
+          }
+        }
+      }
+
+      const workers = Array.from({ length: Math.min(concurrency, total) }, () => workerLoop());
+      await Promise.all(workers);
+
+      const elapsed = Math.round(performance.now() - started);
+      const rps = Math.round((total * 1000) / Math.max(elapsed, 1));
+
+      state.ok += ok;
+      state.err += err;
+      updateKpi();
+
+      setStatus(`Burst done: ok=${ok}, err=${err}, ${rps} req/s`, err > 0 ? "err" : "ok");
+      logLine(`Burst done in ${elapsed}ms, ok=${ok}, err=${err}, approxRps=${rps}`);
+
+      await getViews();
+
+      ["btnBurst", "btnIncrement", "btnGet"].forEach((id) => $(id).disabled = false);
+      state.inFlight = false;
+    }
+
+    function clearLog() {
+      $("log").textContent = "";
+      setStatus("Log cleared.");
+    }
+
+    $("btnIncrement").addEventListener("click", postView);
+    $("btnGet").addEventListener("click", getViews);
+    $("btnHealth").addEventListener("click", checkHealth);
+    $("btnBurst").addEventListener("click", runBurst);
+    $("btnClear").addEventListener("click", clearLog);
+
+    logLine("UI loaded. Start by clicking Check health.");
+  </script>
+</body>
+</html>
